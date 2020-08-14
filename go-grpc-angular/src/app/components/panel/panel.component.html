@@ -1,0 +1,212 @@
+<div nz-row nzType="flex" nzJustify="end" style="padding-bottom: 15px;">
+  <div nz-col nzSpan="4">
+    <nz-button-group>
+      <button nz-button nz-dropdown [nzDropdownMenu]="menu">Переместить<i nz-icon nzType="down"></i></button>
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item>
+            <a (click)="moveTask()">В группу</a>
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+      <nz-modal [(nzVisible)]="isVisibleSelectParent" nzTitle="The first Modal" (nzOnCancel)="cancelSelectParent()" (nzOnOk)="okSelectParent()">
+        <div nz-row>
+          <div nz-col nzSpan="8">Номер группы</div>
+          <div nz-col nzSpan="16">
+            <nz-input-number [(ngModel)]="parentInd" [nzMin]="1" [nzStep]="1" style="width: 100%"></nz-input-number>
+          </div>
+        </div>
+      </nz-modal>
+      <!--      <button nz-button nzType="default" disabled>L</button>-->
+      <!--      <button nz-button nzType="default" disabled>M</button>-->
+      <!--      <button nz-button nzType="default" disabled>R</button>-->
+    </nz-button-group>
+  </div>
+  <div nz-col nzOffset="16" nzSpan="4" style="text-align: right;">
+    <button nz-button nz-dropdown [nzDropdownMenu]="menuAdd" nzType="primary">Добавить<i nz-icon nzType="down"></i></button>
+    <button nz-button (click)="showFilter()"><i nz-icon nzType="search" nzTheme="outline"></i></button>
+    <button nz-button nzType="default" (click)="openHelp()"><i nz-icon nzType="question-circle" nzTheme="outline"></i></button>
+    <nz-dropdown-menu #menuAdd="nzDropdownMenu">
+      <ul nz-menu>
+        <li nz-menu-item *ngFor="let item of buttonAddItems">
+          <a (click)="createTask(item.ind, 1)">{{ item.captionCreate }}</a>
+        </li>
+        <li nz-submenu nzTitle="Шаблон" *ngIf="buttonAddTpl.length > 0">
+          <ul>
+            <li nz-menu-item *ngFor="let item of buttonAddTpl">
+              <a (click)="tplStatus(item.ind)"> <!-- {{ router.createUrlTree(['/template-possible', {status: item.ind, task: 1}]) }} -->
+                {{ item.captionCreate }}
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</div>
+<nz-table
+  #expandTable
+  [nzData]="listOfMapData"
+  [nzFrontPagination]="listOfMapData.length >= 100"
+  [nzShowPagination]="listOfMapData.length >= 100"
+  [nzShowSizeChanger]="listOfMapData.length >= 100"
+  [nzPageSizeOptions]="[100, 200, 500]"
+  [nzPageSize]="100"
+  [nzLoading]="isLoadingTable"
+  style="margin-bottom: 15px"
+  nzSize="middle"
+  [nzNoResult]="empty"
+>
+  <thead>
+  <tr>
+    <th
+      nzShowCheckbox
+      [(nzChecked)]="isAllDisplayDataChecked"
+      [nzIndeterminate]="isIndeterminate"
+      (nzCheckedChange)="checkAll($event)"
+    ></th>
+    <th>Задача</th>
+    <th>Объект мониторинга</th>
+    <th>ID</th>
+    <th>Дата начала</th>
+    <th>Дата изменения</th>
+    <th>Статус</th>
+    <th>Исполнитель</th>
+  </tr>
+  </thead>
+  <tbody>
+  <ng-container *ngFor="let data of expandTable.data; index as i">
+    <ng-container *ngFor="let item of mapOfExpandedData[data.key]">
+      <tr *ngIf="(item.parent && item.parent.expand) || !item.parent" [ngClass]="{'new-task': createdTask.indexOf(item.id) !== -1}">
+        <td
+          nzShowCheckbox
+          [(nzChecked)]="mapOfCheckedId[item.id]"
+          (nzCheckedChange)="refreshStatus()"
+        ></td>
+        <td
+          [nzIndentSize]="item.level * 20"
+          [nzShowExpand]="item.isGroup"
+          [(nzExpand)]="item.expand"
+          (nzExpandChange)="collapse(mapOfExpandedData[data.key], item, $event, item.key)"
+        >
+          <a routerLink="/item/{{ item.id }}" nz-tooltip [nzTooltipTitle]="item.statsStatusList.length > 0 ? tooltipTpl : null" nzTooltipPlacement="right">
+            {{ item.name }}
+            <span *ngIf="item.statsAggregateList[aggregate.STATS_AGGREAGATE_COUNT]">
+              【{{ item.statsAggregateList[aggregate.STATS_AGGREAGATE_COUNT].value }}】
+            </span>
+          </a>
+          <ng-template #tooltipTpl>
+            <div *ngFor="let st of item.statsStatusList">
+              <i nz-icon nzType="alert" nzTheme="fill" [ngStyle]="{'margin-right': '8px', 'color': statusList[st.ind].colorBackground}"></i> <span>{{ statusList[st.ind].caption }}: {{ st.valueStats }}</span><br/>
+            </div>
+          </ng-template>
+        </td>
+        <td>{{ item.score.caption }}</td>
+        <td>{{ item.id }}</td>
+        <td>
+          {{ item.firstDate | date:'dd.MM.yyyy HH:mm:ss' }}
+        </td>
+        <td>
+          {{ item.changeDate | date:'dd.MM.yyyy HH:mm:ss' }}
+        </td>
+        <td><div class="status-color" [ngStyle]="{backgroundColor: item.statusColor, 'opacity': (item.status.length) ? 1 : 0}"></div>{{ item.status }}</td>
+        <td>
+          <a *ngFor="let executor of item.executor" routerLink="/user/{{ executor.id }}">{{ executor.caption }}{{ (item.executor.length > 1) ? ';' : '' }} </a>
+        </td>
+      </tr>
+    </ng-container>
+  </ng-container>
+  </tbody>
+</nz-table>
+<ng-template #empty>
+  <nz-empty
+    [nzNotFoundImage]="
+          '/assets/img/empty.png'
+        "
+    [nzNotFoundContent]="contentTpl"
+  >
+    <ng-template #contentTpl>
+      <span>Нет данных</span>
+    </ng-template>
+  </nz-empty>
+</ng-template>
+
+<nz-drawer
+  [nzVisible]="visibleHelp"
+  nzWidth="50%"
+  nzTitle="Справка"
+  (nzOnClose)="closeHelp()"
+>
+  <p>В ближайшее время здесь появится справка</p>
+</nz-drawer>
+
+<nz-modal [(nzVisible)]="isVisibleModel" nzTitle="Заполните недостающие поля" (nzOnCancel)="handleModelCancel()" (nzOnOk)="handleModelOk()" nzWidth="900px">
+  <app-change-status [task]="1" [status]="statusInd" [data]="createTaskData"></app-change-status>
+</nz-modal>
+
+<nz-drawer
+  [nzClosable]="false"
+  [nzVisible]="isVisibleFilter"
+  nzPlacement="right"
+  nzWidth="25%"
+  nzTitle="Поиск"
+  (nzOnClose)="closeFilter()"
+>
+  <div nz-row>
+    <div nz-col nzSpan="8">Тип фильтрации</div>
+    <div nz-col nzSpan="16">
+      <nz-radio-group [(ngModel)]="search.apply_mask">
+        <label nz-radio [nzValue]="filterApplyType.FILTER_APPLY_AND">AND</label>
+        <label nz-radio [nzValue]="filterApplyType.FILTER_APPLY_OR">OR</label>
+      </nz-radio-group>
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8">Название</div>
+    <div nz-col nzSpan="16">
+      <input nz-input placeholder="Basic usage" [(ngModel)]="search.content_caption_list" />
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8">Родитель</div>
+    <div nz-col nzSpan="16">
+      <input nz-input placeholder="Basic usage" [(ngModel)]="search.parent_task_ind_list" />
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8">Номер задачи</div>
+    <div nz-col nzSpan="16">
+      <input nz-input placeholder="Basic usage" [(ngModel)]="search.task_ind_list" />
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;" *ngIf="monObjectList">
+    <div nz-col nzSpan="8">Объект мониторинга</div>
+    <div nz-col nzSpan="16">
+      <nz-select nzMode="tags" nzPlaceHolder="Tag Mode" style="width: 100%;" [(ngModel)]="search.mon_object_list">
+        <nz-option *ngFor="let option of monObjectList" [nzLabel]="option.caption" [nzValue]="option.ind"></nz-option>
+      </nz-select>
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;" *ngIf="statusList">
+    <div nz-col nzSpan="8">Статус</div>
+    <div nz-col nzSpan="16">
+      <nz-select nzMode="tags" nzPlaceHolder="Tag Mode" style="width: 100%;" [(ngModel)]="search.status_list">
+        <nz-option *ngFor="let option of statusListSearch" [nzLabel]="option.caption" [nzValue]="option.ind"></nz-option>
+      </nz-select>
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8">Тип</div>
+    <div nz-col nzSpan="16">
+          <nz-select nzMode="tags" nzPlaceHolder="Tag Mode" style="width: 100%;" [(ngModel)]="search.task_type_list">
+            <nz-option *ngFor="let option of taskTypeList" [nzLabel]="option.captionRegion" [nzValue]="option.ind"></nz-option>
+          </nz-select>
+    </div>
+  </div>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8"></div>
+    <div nz-col nzSpan="16">
+      <button nz-button nzType="primary" (click)="startSearch()">Поиск</button>
+    </div>
+  </div>
+</nz-drawer>

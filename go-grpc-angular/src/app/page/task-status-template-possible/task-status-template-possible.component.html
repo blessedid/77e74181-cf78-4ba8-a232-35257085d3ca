@@ -1,0 +1,188 @@
+<div nz-row>
+  <div nz-col nzSpan="8">
+    <button nz-button nzType="primary" (click)="valueChange()" style="margin-bottom: 15px;">Создать</button>
+  </div>
+  <div nz-col nzSpan="8" nzOffset="8" style="text-align: right;">
+    <button nz-button (click)="showFilter()"><i nz-icon nzType="search" nzTheme="outline"></i></button>
+  </div>
+</div>
+
+<div class="sc2" style="width: 100%; overflow-x: scroll;">
+  <nz-table
+    style="width: auto"
+    [nzWidthConfig]="['10px', '200px']"
+    [nzFrontPagination]="false"
+    [nzShowPagination]="false"
+    (nzCurrentPageDataChange)="currentPageDataChange($event)"
+    [nzData]="listOfDisplayData"
+    #dataTable
+  >
+    <thead>
+    <tr>
+      <th
+        nzShowCheckbox
+        [(nzChecked)]="isAllDisplayDataChecked"
+        [nzIndeterminate]="isIndeterminate"
+        (nzCheckedChange)="checkAll($event)"
+      ></th>
+      <th *ngFor="let label of listOfAllData.label">{{ label }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let data of dataTable.data; index as i1">
+      <td
+        nzShowCheckbox
+        [(nzChecked)]="mapOfCheckedId[data.id]"
+        [nzDisabled]="data.disabled"
+        (nzCheckedChange)="refreshStatus()"
+      ></td>
+      <td>
+<!--        <input nz-input placeholder="Название поля" [(ngModel)]="data.contentCaption" style="width: 200px;" />-->
+        <textarea nz-input [(ngModel)]="data.contentCaption" style="width: 200px;" nzAutosize></textarea>
+      </td>
+      <td>
+        <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Select a person" style="width: 200px;" [(ngModel)]="data.monObjectInd">
+          <nz-option *ngFor="let op of monObjectList" [nzLabel]="op.caption" [nzValue]="op.ind"></nz-option>
+        </nz-select>
+      </td>
+      <td>
+        <nz-input-number [nzMin]="0" [nzStep]="1" [(ngModel)]="data.priority"></nz-input-number>
+      </td>
+      <td>
+        <nz-date-picker
+          nzShowTime
+          nzFormat="yyyy-MM-dd HH:mm:ss"
+          [(ngModel)]="data.datePlanningStart"
+        ></nz-date-picker>
+      </td>
+      <td>
+        <nz-date-picker
+          nzShowTime
+          nzFormat="yyyy-MM-dd HH:mm:ss"
+          [(ngModel)]="data.datePlanningEnd"
+        ></nz-date-picker>
+      </td>
+      <td>
+        <nz-input-number [nzMin]="0" [nzStep]="1" [(ngModel)]="data.timeEstimate"></nz-input-number>
+      </td>
+      <td *ngFor="let item of data.manual">
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_COMBOBOX">
+          <!--    ComboBox-->
+          <nz-select nzShowSearch nzAllowClear class="edit-param" style="width: 200px" [(ngModel)]="item.valueDefault"
+                     (ngModelChange)="provinceChange($event, item.id, item.dependentList, i1)"  (change)="provinceChange(item.valueDefault, item.id, item.dependentList, i1)" ng #editing>
+            <nz-option *ngFor="let op of item.valueList" [nzLabel]="op.caption" [nzValue]="op.value"></nz-option>
+          </nz-select>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_DATETIME">
+          <!--    DateTime-->
+          <nz-date-picker
+            nzShowTime
+            nzFormat="dd.MM.yyyy HH:mm"
+            [(ngModel)]="item.val"
+          ></nz-date-picker>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_STRING">
+          <!--    String-->
+          <input nz-input [(ngModel)]="item.val" #editing />
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_LIST">
+          <!--    List-->
+          <nz-checkbox-group [(ngModel)]="item.val" #editing></nz-checkbox-group>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_TIME">
+          <!--    Time-->
+          <nz-time-picker [(ngModel)]="item.val" nzFormat="HH:mm" style="width: 100%" #editing></nz-time-picker>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_INTEGER">
+          <!--    Integer-->
+          <nz-input-number [(ngModel)]="item.val" [nzStep]="1" style="width: 100%" #editing></nz-input-number>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_DATE">
+          <!--    Date-->
+          <nz-date-picker [(ngModel)]="item.val" #editing></nz-date-picker>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_BOOL">
+          <!--    Boolean-->
+          <nz-switch [(ngModel)]="item.val" #editing></nz-switch>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_MEMO">
+          <!--    Memo-->
+          <textarea
+            nz-input
+            placeholder="memo"
+            [(ngModel)]="item.val"
+            [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+            #editing
+          ></textarea>
+        </div>
+
+        <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_PERIOD">
+          <!--    Period-->
+          <nz-range-picker [(ngModel)]="item.val" #editing></nz-range-picker>
+        </div>
+      </td>
+      <td *ngFor="let item of data.role">
+        <div>
+          <!--  role -->
+          <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Select a person" nzMode="multiple" class="edit-param" style="width: 200px" [(ngModel)]="item.applyList" #editing>
+            <nz-option *ngFor="let op of item.possibleList" [nzLabel]="op.caption" [nzValue]="op.ind"></nz-option>
+          </nz-select>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </nz-table>
+</div>
+
+<button nz-button nzType="primary" (click)="valueChange()" style="margin-top: 15px;">Создать</button>
+
+<nz-drawer
+  [nzClosable]="false"
+  [nzVisible]="isVisibleFilter"
+  nzPlacement="right"
+  nzWidth="25%"
+  nzTitle="Поиск"
+  (nzOnClose)="closeFilter()"
+>
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8">Название</div>
+    <div nz-col nzSpan="16">
+      <input nz-input placeholder="Basic usage" [(ngModel)]="search.name" />
+    </div>
+  </div>
+<!--  <div nz-row style="padding-top: 15px;">-->
+<!--    <div nz-col nzSpan="8">Родитель</div>-->
+<!--    <div nz-col nzSpan="16">-->
+<!--      <input nz-input placeholder="Basic usage" [(ngModel)]="search.parent_task_ind_list" />-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <div nz-row style="padding-top: 15px;">-->
+<!--    <div nz-col nzSpan="8">Номер задачи</div>-->
+<!--    <div nz-col nzSpan="16">-->
+<!--      <input nz-input placeholder="Basic usage" [(ngModel)]="search.task_ind_list" />-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <div nz-row style="padding-top: 15px;" *ngIf="monObjectList">-->
+<!--    <div nz-col nzSpan="8">Объект мониторинга</div>-->
+<!--    <div nz-col nzSpan="16">-->
+<!--      <nz-select nzMode="multiple" nzPlaceHolder="Tag Mode" style="width: 100%;" [(ngModel)]="search.mon_object_list">-->
+<!--        <nz-option *ngFor="let option of monObjectList" [nzLabel]="option.caption" [nzValue]="option.ind"></nz-option>-->
+<!--      </nz-select>-->
+<!--    </div>-->
+<!--  </div>-->
+  <div nz-row style="padding-top: 15px;">
+    <div nz-col nzSpan="8"></div>
+    <div nz-col nzSpan="16">
+      <button nz-button nzType="primary" (click)="searchTable()">Поиск</button>
+      <button nz-button (click)="reset()" style="margin-left: 15px;">Очистить</button>
+    </div>
+  </div>
+</nz-drawer>

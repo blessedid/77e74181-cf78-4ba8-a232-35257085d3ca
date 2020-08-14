@@ -1,0 +1,9 @@
+[nz-button] {
+  margin-right: 8px;
+}
+.status-color {
+  height: 10px;
+  width: 10px;
+  margin-right: 4px;
+  display: inline-block;
+}

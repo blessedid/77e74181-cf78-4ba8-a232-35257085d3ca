@@ -1,0 +1,216 @@
+<div nz-row nzGutter="16">
+  <div nz-col nzSpan="18">
+    <div style="border-bottom: 1px solid #e8e8e8;margin-bottom: 20px;">
+      <h1 *ngIf="!isEdit">{{taskInfo.caption}}</h1>
+      <input *ngIf="isEdit" nz-input placeholder="Задача" [(ngModel)]="contentEdit.caption" />
+    </div>
+
+    <div class="task-desc">
+      <div *ngIf="!isEdit" [innerHTML]="taskInfo.content | sanitizeHtml"></div>
+      <editor *ngIf="isEdit" [(ngModel)]="contentEdit.content" [init]="{menubar: false,
+    base_url: '/assets/tinymce',
+    language: 'ru',
+    suffix: '.min',
+    paste_data_images: true,
+    plugins: [
+      'advlist autolink lists link image charmap print preview anchor',
+      'searchreplace visualblocks code fullscreen',
+      'insertdatetime media table paste code image wordcount'
+    ],
+    toolbar: 'undo redo | formatselect |  bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter  alignright alignjustify | bullist numlist outdent indent'}"></editor>
+    </div>
+
+    <nz-divider></nz-divider>
+    <i
+      nz-icon
+      nzType="star"
+      [nzTheme]="(star) ? 'outline' : 'fill'"
+      class="star"
+      (click)="updateStar()"
+      [ngStyle]="{'color': star ? 'rgba(0, 0, 0, 0.65)' : '#FBC02D'}"
+    ></i>
+    <button nz-button nzType="primary" nzGhost *ngIf="!isEdit" (click)="startEditContent()">Редактировать</button>
+    <button nz-button nzType="primary" *ngIf="isEdit" (click)="saveContent()" style="margin-right: 15px;">Сохранить</button>
+    <button nz-button *ngIf="isEdit" (click)="stopEditContent()">Отмена</button>
+    <nz-divider></nz-divider>
+
+<!--    <nz-divider [nzText]="hts" nzOrientation="left" style="color: #1890ff"></nz-divider>-->
+<!--    <ng-template #hts>dgdfgdfg</ng-template>-->
+
+    <nz-timeline>
+      <nz-timeline-item [nzDot]="(taskItem.type === 'taskStatus') ? taskStatus : null" *ngFor="let taskItem of taskInfo.history">
+        <p *ngIf="taskItem.type != 'commentList'" style="margin-bottom: 0.5em;">
+          {{ dateFormat(taskItem.dateApply, 'dd.MM.yyyy HH:mm:ss') }}
+          <a *ngIf="taskItem.accountApply">{{ getName(taskItem.accountApply) }}</a>
+          {{ formatText(taskItem) }}
+        </p>
+        <nz-card *ngIf="taskItem.type == 'commentList'">
+          <nz-comment [nzAuthor]="getName(taskItem.accountApply)" [nzDatetime]="distanceTimeInWords(taskItem.dateApply)">
+            <nz-avatar
+              nz-comment-avatar
+              nzIcon="user"
+            ></nz-avatar>
+            <nz-comment-content>
+              <div [innerHTML]="taskItem.text | sanitizeHtml"></div>
+            </nz-comment-content>
+          </nz-comment>
+        </nz-card>
+      </nz-timeline-item>
+    </nz-timeline>
+    <ng-template #taskStatus>
+      <i nz-icon nzType="check-circle" nzTheme="fill" style="font-size: 16px;"></i>
+    </ng-template>
+
+    <app-add-comment *ngIf="taskCardInfoService.getRight(taskInfo.userRight, TaskRight.TASK_RIGHT_COMMENT_ADD)"></app-add-comment>
+
+  </div>
+  <div nz-col nzSpan="6">
+      <nz-card nzTitle="Статус: {{(statusList[taskInfo.status]) ? statusList[taskInfo.status].caption : ''}}" [nzBordered]="false">
+        <form *ngIf="taskCardInfoService.getRight(taskInfo.userRight, TaskRight.TASK_RIGHT_STATUS_INPUT_CHANGE) && taskInfo.statusPossibleList.length > 0" (ngSubmit)="statusChange()">
+          <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Действия" style="width: 100%;" [(ngModel)]="taskStatusChangeInd" name="first">
+<!--            <nz-option *ngFor="let option of taskInfo.statusPossibleList" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>-->
+            <nz-option-group *ngFor="let el of taskInfo.statusPossibleList" [nzLabel]="el.groupName">
+              <nz-option *ngFor="let option of el.items" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>
+            </nz-option-group>
+          </nz-select>
+          <button nz-button nzType="primary" style="width: 100%;margin-top: 15px;" *ngIf="taskStatusChangeInd">Применить</button>
+          <nz-divider></nz-divider>
+        </form>
+
+        <div *ngIf="taskInfo.statusTemplatePossibleList && taskInfo.statusTemplatePossibleList.length > 0">
+          <button nz-button nz-dropdown [nzDropdownMenu]="tplAddTemplate" style="width: 100%">Добавить из шаблона<i nz-icon nzType="down"></i></button>
+          <nz-dropdown-menu #tplAddTemplate="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item *ngFor="let item of taskInfo.statusTemplatePossibleList">
+                <a (click)="createFromTemplate(item.ind)">{{ item.captionCreate }}</a>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+          <nz-divider></nz-divider>
+        </div>
+
+        <div *ngIf="taskInfo.comment && (taskInfo.comment.text.length || taskInfo.comment.comment.length)">
+          <p>{{taskInfo.comment.text}}</p>
+          <p>{{taskInfo.comment.comment}}</p>
+          <nz-divider></nz-divider>
+        </div>
+
+        <div nz-row *ngFor="let item of list" style="border-bottom: 1px solid #e8e8e8;padding: 10px 0;">
+          <div nz-col nzSpan="12"><strong>{{ item.title }}</strong></div>
+          <div nz-col nzSpan="12">
+            <div (click)="startEditBasicInfo(item.id, $event)" *ngIf="editId !== item.id; else editTpl">
+                {{ (item.type === ManualParamType.MANUAL_TYPE_COMBOBOX) ? getCaptionMonObject(item) :
+                      (item.type === ManualParamType.MANUAL_TYPE_DATETIME) ? dateFormat(item.value.val, 'dd.MM.yyyy HH:mm:ss') :
+                      (item.type === ManualParamType.MANUAL_TYPE_INTEGER) ? item.value.val : item.value.caption}}
+            </div>
+            <ng-template #editTpl>
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_COMBOBOX">
+                <!--    ComboBox-->
+                <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Select a person" class="edit-param" style="width: 100%" [(ngModel)]="item.value.val" #editing>
+                  <nz-option *ngFor="let item of monObject" [nzLabel]="item.caption" [nzValue]="item.ind"></nz-option>
+                </nz-select>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_DATETIME">
+                <!--    DateTime-->
+                <nz-date-picker
+                  nzShowTime
+                  nzFormat="dd.MM.yyyy HH:mm"
+                  nzPlaceHolder="Select Time"
+                  [(ngModel)]="item.value.val"
+                  (ngModelChange)="onChange($event)"
+                  (nzOnOk)="onOk($event)"
+                ></nz-date-picker>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_STRING">
+                <!--    String-->
+                <input nz-input [(ngModel)]="item.value.val" #editing />
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_LIST">
+                <!--    List-->
+                <nz-checkbox-group [(ngModel)]="item.value.val" (ngModelChange)="log(item.view)" #editing></nz-checkbox-group>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_TIME">
+                <!--    Time-->
+                <nz-time-picker [(ngModel)]="item.value.val" nzFormat="HH:mm" style="width: 100%" #editing></nz-time-picker>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_INTEGER">
+                <!--    Integer-->
+                <nz-input-number [(ngModel)]="item.value.val" [nzStep]="1" style="width: 100%" #editing></nz-input-number>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_DATE">
+                <!--    Date-->
+                <nz-date-picker [(ngModel)]="item.value.val" (ngModelChange)="onChange($event)" #editing></nz-date-picker>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_BOOL">
+                <!--    Boolean-->
+                <nz-switch [(ngModel)]="item.value.val" #editing></nz-switch>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_MEMO">
+                <!--    Memo-->
+                <textarea
+                  nz-input
+                  placeholder="memo"
+                  [(ngModel)]="item.view.val"
+                  [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+                  #editing
+                ></textarea>
+              </div>
+
+              <div *ngIf="item.type === ManualParamType.MANUAL_TYPE_PERIOD">
+                <!--    Period-->
+                <nz-range-picker [(ngModel)]="item.view.val" (ngModelChange)="onChange($event)" #editing></nz-range-picker>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div *ngFor="let item of taskInfo.roleList; index as i">
+          <div [ngStyle]="{'border-bottom': taskInfo.roleList.length -1 !== i ? '1px solid #e8e8e8' : 'none', 'padding': '10px 0'}">
+            <div class="role-name">
+              <strong class="leftstr">{{ item.name }}</strong>
+              <div class="rightstr" style="cursor: pointer;" *ngIf="taskCardInfoService.getRight(taskInfo.userRight, TaskRight.TASK_RIGHT_ROLE_CHANGE)"
+              (click)="startEditRole(item.id, $event)">ред.</div>
+            </div>
+            <ul class="role-ul" *ngIf="editId !== item.id; else editRoleTpl">
+              <li class="role-li" *ngFor="let user of item.applyList">
+                <a routerLink="/user/{{ user.id }}"><nz-avatar nzIcon="user"></nz-avatar> {{ user.caption }}</a>
+              </li>
+            </ul>
+            <ng-template #editRoleTpl>
+              <div nz-row nzGutter="8">
+                <div nz-col nzSpan="19">
+                  <nz-select [(ngModel)]="roleValue" nzMode="multiple" nzPlaceHolder="Выберите пользователей" style="width: 100%;">
+                    <nz-option *ngFor="let option of listOfOption" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>
+                  </nz-select>
+                </div>
+                <div nz-col nzSpan="5">
+                  <nz-button-group>
+                    <button nz-button nzType="primary" (click)="saveRole()"><i nz-icon nzType="save"></i></button>
+                    <button nz-button (click)="cancelRole()"><i nz-icon nzType="close-circle"></i></button>
+                  </nz-button-group>
+                </div>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </nz-card>
+
+
+  </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisibleModel" nzTitle="Заполните недостающие поля" (nzOnCancel)="cancelStatusChange()" (nzOnOk)="statusChangeConf()" nzWidth="900px">
+  <app-change-status [task]="taskInd" [status]="taskStatusChangeInd" [data]="statusChangeData"></app-change-status>
+</nz-modal>
+
+<nz-modal [(nzVisible)]="isVisibleModelManualChange" nzTitle="Изменение полей" (nzOnCancel)="cancelManualChange()" (nzOnOk)="manualChangeConf()" nzWidth="900px">
+  <app-change-manual-field [data]="manualChangeData" [task]="taskInd"></app-change-manual-field>
+</nz-modal>

@@ -1,0 +1,43 @@
+<!--<agm-map [latitude]="lat" [longitude]="lng" [zoom]="15">-->
+<!--  <agm-marker (markerClick)="aaa($event)" [latitude]="lat" [longitude]="lng"></agm-marker>-->
+<!--</agm-map>-->
+<!--<hr>-->
+<nz-table
+  #basicTable
+  [nzData]="monObjectList"
+  [nzLoading]="isLoadingTable"
+  nzSize="middle"
+  nzShowSizeChanger
+  [nzPageSize]="20"
+>
+  <thead (nzSortChange)="sort($event)" nzSingleSort>
+  <tr>
+    <th nzShowSort nzSortKey="caption">Магазин</th>
+<!--    <th>Адрес</th>-->
+    <th>Телефон</th>
+    <th>E-mail</th>
+    <th nzShowSort nzSortKey="openDate">Дата открытия</th>
+    <th>Тип объекта</th>
+    <th>Тип помещения объекта</th>
+    <th>Общая площадь, м2</th>
+<!--    <th>Регион</th>-->
+    <th>Наименование юридического лица</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let data of basicTable.data">
+    <td>
+      <a routerLink="/object/{{ data.monObjectInd }}">{{ data.caption }}</a>
+    </td>
+<!--    <td>{{ data.address }}</td>-->
+    <td>{{ data.phone }}</td>
+    <td>{{ data.email}}</td>
+    <td>{{ data.openDate | date:'dd.MM.yyyy' }}</td>
+    <td>{{ data.unitType }}</td>
+    <td>{{ data.premesisType }}</td>
+    <td>{{ data.totalarea }}</td>
+<!--    <td>{{ data.region }}</td>-->
+    <td>{{ data.company}}</td>
+  </tr>
+  </tbody>
+</nz-table>

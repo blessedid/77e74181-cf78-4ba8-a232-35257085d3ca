@@ -1,0 +1,105 @@
+<nz-tabset nzLinkRouter nzTabPosition="right">
+  <nz-tab *ngFor="let groups of data">
+    <a nz-tab-link [routerLink]="['.']" [queryParams]="{ act: groups.url }" style="max-width: 300px" queryParamsHandling="merge">{{ groups.group_name }}</a>
+    {{ groups.group_name }}
+    <ng-template nz-tab>
+      <form nz-form (ngSubmit)="submitForm()">
+
+        <nz-form-item *ngFor="let item of groups.group">
+          <nz-form-label [nzSm]="12" [nzXs]="24">{{ item.rus_name }}</nz-form-label>
+          <nz-form-control [nzSm]="12" [nzXs]="24">
+            <input nz-input [(ngModel)]="formModel[item.name]" [name]="item.name" *ngIf="item.type == 1" />
+
+            <nz-select nzShowSearch
+                       nzPlaceHolder="{{item.value}}"
+                       [(ngModel)]="formModel[item.name]"
+                       [name]="item.name"
+                       *ngIf="item.type == 2">
+              <nz-option *ngFor="let option of item.options" [nzLabel]="option.label" [nzValue]="option.value"></nz-option>
+            </nz-select>
+
+            <nz-date-picker [(ngModel)]="formModel[item.name]" [name]="item.name" *ngIf="item.type == 3"></nz-date-picker>
+
+            <div *ngIf="item.type == 4">
+              <nz-input-group [nzPrefix]="prefixTemplateUser" [nzSuffix]="suffixTemplateInfo" *ngFor="let control of listOfControl[item.name]; let i = index">
+                <input type="text" nz-input value="{{control.controlInstance}}" [name]="item.name" [placeholder]="item.rus_name"/>
+                <ng-template #prefixTemplateUser><i (click)="addField($event, item.name)" nz-icon nzType="plus-circle"></i></ng-template>
+                <ng-template #suffixTemplateInfo><i (click)="removeField(control, $event, item.name)" nz-icon nzType="close-circle" nzTheme="outline"></i></ng-template>
+              </nz-input-group>
+            </div>
+
+            <div *ngIf="item.type == 5">
+              <textarea [ngModel]="formModel[item.name]" [name]="item.name" nz-input nzAutosize></textarea>
+            </div>
+
+            <nz-select
+              [(ngModel)]="formModel[item.name]"
+              nzMode="tags"
+              [name]="item.name"
+              *ngIf="item.type == 6"
+              [nzPlaceHolder]="item.rus_name"
+            >
+              <nz-option *ngFor="let option of item.options" [nzLabel]="option" [nzValue]="option" [nzHide]="!isNotSelected(item.name, option)"></nz-option>
+            </nz-select>
+
+            <a (click)="showModal()" *ngIf="item.type == 7">Просмотр</a>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item nz-row class="register-area">
+          <nz-form-control [nzSpan]="6" [nzOffset]="12">
+            <button nz-button nzType="primary">Сохранить</button>
+            <button style="margin-left: 15px" nz-button>Отмена</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-template>
+  </nz-tab>
+</nz-tabset>
+
+<nz-modal [(nzVisible)]="isVisibleModal" nzWidth="60vw" nzTitle="Смета" [nzFooter]="null" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+  <nz-table #editRowTable nzBordered [nzData]="listOfData">
+    <thead>
+    <tr>
+      <th>№ п/п</th>
+      <th nzWidth="50%">Наименование</th>
+      <th nzWidth="5%">Единицы измерения</th>
+      <th>Количество</th>
+      <th>Цена,<br> руб. с НДС</th>
+      <th>Стоимость,<br> руб. с НДС</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let data of editRowTable.data" class="editable-row">
+      <td>{{ data.key }}</td>
+      <td>
+        <div class="editable-cell" *ngIf="editId !== data.key; else editTpl">
+          <div class="editable-cell-value-wrap" (click)="startEdit(data.key, $event)">
+            {{ data.name }}
+          </div>
+        </div>
+        <ng-template #editTpl>
+          <nz-select nzShowSearch nzPlaceHolder="Select a person" [(ngModel)]="data.estimateID" (ngModelChange)="editSelect($event, data.key)" style="width: 100%">
+            <nz-option *ngFor="let option of estimateValue" [nzLabel]="option.name" [nzValue]="option.id"></nz-option>
+          </nz-select>
+        </ng-template>
+      </td>
+      <td>{{ data.units }}</td>
+      <td>
+        <nz-input-number [(ngModel)]="data.amount" [nzMin]="0" [nzStep]="1"></nz-input-number>
+      </td>
+      <td>{{ data.price }}</td>
+      <td>{{ data.price * data.amount | number:'.0-3' }}</td>
+      <td>
+        <a nz-popconfirm nzTitle="Sure to delete?" (nzOnConfirm)="deleteRow(data.key)"><i nz-icon nzType="delete" nzTheme="outline"></i></a>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="7">
+        <div style="text-align: center;cursor: pointer;" (click)="addRow()"><i nz-icon nzType="plus" nzTheme="outline"></i> Добавить позицию</div>
+      </td>
+    </tr>
+    </tbody>
+  </nz-table>
+</nz-modal>

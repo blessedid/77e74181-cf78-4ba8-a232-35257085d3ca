@@ -1,0 +1,32 @@
+<nz-table #basicTable
+          [nzData]="dataSet"
+          nzFrontPagination="false"
+          nzShowPagination="false"
+          *ngIf="!param.id"
+>
+  <thead>
+  <tr>
+    <th>Сокращенное наименование</th>
+    <th>Телефон</th>
+    <th>E-mail</th>
+    <th>ИНН</th>
+    <th>ОГРН</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let data of basicTable.data">
+    <td>
+      <a routerLink="/entities/123">{{data.name}}</a>
+    </td>
+    <td>{{data.phone}}</td>
+    <td>{{data.email}}</td>
+    <td>{{data.inn}}</td>
+    <td>{{data.ogrn}}</td>
+  </tr>
+  </tbody>
+</nz-table>
+
+<div *ngIf="param.id">
+  <app-card-view [data]="data" url="entities" *ngIf="!isEdit"></app-card-view>
+  <app-card-edit *ngIf="isEdit" [data]="data2"></app-card-edit>
+</div>

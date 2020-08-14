@@ -1,0 +1,13 @@
+<nz-comment>
+  <nz-avatar nz-comment-avatar nzIcon="user"></nz-avatar>
+  <nz-comment-content>
+    <nz-form-item>
+      <editor [(ngModel)]="comment" [init]="init"></editor>
+    </nz-form-item>
+    <nz-form-item>
+      <button nz-button nzType="primary" (click)="sendComment($event)" [nzLoading]="isLoadingButton">
+        Добавить комментарий
+      </button>
+    </nz-form-item>
+  </nz-comment-content>
+</nz-comment>

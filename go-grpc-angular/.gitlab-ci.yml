@@ -1,0 +1,36 @@
+image: node:lts-slim
+
+stages:
+  - build
+  - deploy
+
+cache:
+#  untracked: true
+  paths:
+#    - node_modules/
+    - dist/
+
+build:
+  stage: build
+  script:
+    - npm install
+    - npm run build
+
+deploy:
+  before_script:
+    # Гитлаб скачивает себе утилиту sshpass
+    - apt-get update -qq && apt-get install -y -qq sshpass
+    # Настраиваем SSH
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  stage: deploy
+  script:
+    # Используем утилиту sshpass для удаленного выполнения команд на VDS
+    - sshpass -V
+    - export SSHPASS=$USER_PASS
+    # Копируем новые файлы
+    - sshpass -e scp -o stricthostkeychecking=no -r /builds/smis-software/Sittelle/WEB/dist/Sittelle/ $USER@$HOST:$TARGET_DIR_ON_HOST

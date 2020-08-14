@@ -1,0 +1,28 @@
+[
+  {
+    "type": "header",
+    "values": {
+      "title": "Тарифы на услуги курьерской доставки по Москве",
+      "button": [
+        {
+          "text": "Заказать доставку",
+          "link": "/order",
+          "outlined": false
+        },
+        {
+          "text": "Отследить отправление",
+          "link": "#",
+          "outlined": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "couriers_on_map",
+    "values": []
+  },
+  {
+    "type": "table",
+    "values": []
+  }
+]

@@ -1,0 +1,92 @@
+<form nz-form [formGroup]="validateForm">
+  <div *ngFor="let param of data;index as i1">
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_COMBOBOX">
+      <nz-form-label [nzSm]="5" [nzXs]="24" nzFor="combobox">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="19" [nzXs]="24">
+        <nz-select nzShowSearch [(ngModel)]="param.valueDf"
+                   (ngModelChange)="provinceChange($event, param.ind, param.dependentList, i1, param.parentParam)"
+                   formControlName="param{{param.ind}}" id="combobox">
+          <nz-option *ngFor="let op of param.valueListList" [nzLabel]="op.caption" [nzValue]="op.value"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_DATETIME">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="datetime">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-date-picker
+          formControlName="param{{param.ind}}"
+          id="datetime"
+          nzShowTime
+          nzFormat="dd.MM.yyyy HH:mm"
+          nzPlaceHolder="Select Time"
+          [(ngModel)]="param.valueDf"
+        ></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_STRING">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="string">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input id="string" formControlName="param{{param.ind}}" [(ngModel)]="param.valueDf"/>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_LIST">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="list">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-checkbox-group id="list" formControlName="param{{param.ind}}" [(ngModel)]="param.valueDf"></nz-checkbox-group>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_TIME">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="time0">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-time-picker [(ngModel)]="param.valueDf" nzFormat="HH:mm" id="time0"
+                        formControlName="param{{param.ind}}"></nz-time-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_INTEGER">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="integer">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-input-number [(ngModel)]="param.valueDf" [nzMin]="1" [nzMax]="10" [nzStep]="1" id="integer" formControlName="param{{param.ind}}"></nz-input-number>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_DATE">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="date">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-date-picker [(ngModel)]="param.valueDf" id="date" formControlName="param{{param.ind}}"></nz-date-picker>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_BOOL">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="boolean">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-switch [(ngModel)]="param.valueDf" id="boolean" formControlName="param{{param.ind}}"></nz-switch>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_MEMO">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="memo">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+      <textarea
+        nz-input
+        id="memo"
+        formControlName="param{{param.ind}}"
+        placeholder="memo"
+        [(ngModel)]="param.valueDf"
+        [nzAutosize]="{ minRows: 2, maxRows: 6 }"
+      ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item *ngIf="param.paramType === manualParamType.MANUAL_TYPE_PERIOD">
+      <nz-form-label [nzSm]="8" [nzXs]="24" nzFor="period">{{param.caption}}</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <nz-range-picker [(ngModel)]="param.valueDf" id="period" formControlName="param{{param.ind}}"></nz-range-picker>
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+</form>

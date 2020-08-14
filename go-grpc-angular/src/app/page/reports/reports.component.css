@@ -1,0 +1,19 @@
+nz-card {
+  position: relative;
+  display: flex;
+  padding: 12px;
+}
+
+nz-card:hover {
+  box-shadow: 0 5px 10px #e8e8e8;
+  transition: all 0.2s ease 0s;
+}
+
+.ant-card-cover {
+  height: 64px;
+  width: auto;
+}
+
+div.ant-card-body {
+  padding: 16px;
+}

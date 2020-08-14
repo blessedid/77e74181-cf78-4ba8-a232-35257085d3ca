@@ -1,0 +1,108 @@
+<!--<p>graphs works!</p>-->
+<!--<div style="display: flex">-->
+<!--  <ngx-charts-bar-vertical-->
+<!--    [view]="view"-->
+<!--    [scheme]="colorScheme"-->
+<!--    [results]="single"-->
+<!--    [gradient]="gradient"-->
+<!--    [xAxis]="showXAxis"-->
+<!--    [yAxis]="showYAxis"-->
+<!--    [legend]="showLegend"-->
+<!--    [showXAxisLabel]="showXAxisLabel"-->
+<!--    [showYAxisLabel]="showYAxisLabel"-->
+<!--    [xAxisLabel]="xAxisLabel"-->
+<!--    [yAxisLabel]="yAxisLabel"-->
+<!--  >-->
+<!--  </ngx-charts-bar-vertical>-->
+
+<!--  <ngx-charts-bar-horizontal-2d-->
+<!--    [view]="view"-->
+<!--    [scheme]="colorScheme"-->
+<!--    [results]="multi"-->
+<!--    [gradient]="gradient"-->
+<!--    [xAxis]="showXAxis"-->
+<!--    [yAxis]="showYAxis"-->
+<!--    [legend]="showLegend"-->
+<!--    [showXAxisLabel]="showXAxisLabel"-->
+<!--    [showYAxisLabel]="showYAxisLabel"-->
+<!--    [xAxisLabel]="xAxisLabel"-->
+<!--    [yAxisLabel]="yAxisLabel"-->
+<!--    barPadding="0"-->
+<!--    groupPadding="5"-->
+<!--  >-->
+<!--  </ngx-charts-bar-horizontal-2d>-->
+
+<!--</div>-->
+<!--<div style="display: flex">-->
+<!--  <ngx-charts-bar-vertical-normalized-->
+<!--    [view]="view"-->
+<!--    [scheme]="colorScheme"-->
+<!--    [results]="multi"-->
+<!--    [gradient]="gradient"-->
+<!--    [xAxis]="showXAxis"-->
+<!--    [yAxis]="showYAxis"-->
+<!--    [legend]="showLegend"-->
+<!--    [showXAxisLabel]="showXAxisLabel"-->
+<!--    [showYAxisLabel]="showYAxisLabel"-->
+<!--    [xAxisLabel]="xAxisLabel"-->
+<!--    [yAxisLabel]="yAxisLabel"-->
+<!--  ></ngx-charts-bar-vertical-normalized>-->
+
+<!--  <ngx-charts-line-chart-->
+<!--    [view]="view"-->
+<!--    [scheme]="colorScheme"-->
+<!--    [results]="lineChart"-->
+<!--    [gradient]="gradient"-->
+<!--    [xAxis]="showXAxis"-->
+<!--    [yAxis]="showYAxis"-->
+<!--    [legend]="showLegend"-->
+<!--    [showXAxisLabel]="showXAxisLabel"-->
+<!--    [showYAxisLabel]="showYAxisLabel"-->
+<!--    [xAxisLabel]="xAxisLabel"-->
+<!--    [yAxisLabel]="yAxisLabel"-->
+<!--    [curve]="curves.StepAfter"-->
+<!--  ></ngx-charts-line-chart>-->
+<!--</div>-->
+
+
+<nz-tabset>
+  <nz-tab nzTitle="Состояние оборудования">
+    <h1>Состояние оборудования</h1>
+    <div style="display: flex; height: 150vh">
+      <ngx-charts-bar-horizontal-2d
+        [view]="view"
+        [scheme]="multi2Color"
+        [results]="multi2"
+        [gradient]="gradient"
+        [xAxis]="showXAxis"
+        [yAxis]="showYAxis"
+        [legend]="showLegend"
+        legendTitle="Легенда"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+        barPadding="0"
+        groupPadding="5"
+      >
+        <ngx-tooltip-content></ngx-tooltip-content>
+      </ngx-charts-bar-horizontal-2d>
+    </div>
+  </nz-tab>
+  <nz-tab nzTitle="Общее состояние">
+    <div style="display: flex; height: 100vh">
+      <ngx-charts-bar-horizontal-normalized
+        [view]="view"
+        [scheme]="horizontalBarColor"
+        [results]="horizontalBar"
+        [gradient]="gradient"
+        [xAxis]="showXAxis"
+        [yAxis]="showYAxis"
+        [legend]="showLegend"
+        legendTitle="Легенда"
+        [showXAxisLabel]="false"
+        [showYAxisLabel]="showYAxisLabel"
+        [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel"
+      ></ngx-charts-bar-horizontal-normalized>
+    </div>
+  </nz-tab>
+</nz-tabset>

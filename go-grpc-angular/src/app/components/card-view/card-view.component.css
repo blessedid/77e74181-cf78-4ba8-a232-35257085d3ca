@@ -1,0 +1,16 @@
+nz-list-item {
+  padding-top: 6px;
+  padding-bottom: 0;
+}
+nz-list-item-meta {
+  margin-bottom: -12px !important;
+}
+h4 .ant-list-item-meta-title .ng-star-inserted {
+  margin-bottom: 0 !important;
+}
+div.ant-list-vertical.ant-list-item-extra{
+  width: 50% !important;
+}
+div.ant-list-item-meta-content.ng-star-inserted {
+  width: 50% !important;
+}

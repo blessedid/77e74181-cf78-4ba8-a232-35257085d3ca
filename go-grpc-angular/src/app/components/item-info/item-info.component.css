@@ -1,0 +1,25 @@
+nz-card {
+  margin-bottom: 15px;
+}
+
+.role-li {
+  list-style-type: none;
+  padding-top: 30px;
+}
+
+.leftstr, .rightstr {
+  float: left; /* Обтекание справа */
+  width: 50%; /* Ширина текстового блока */
+}
+.rightstr {
+  text-align: right; /* Выравнивание по правому краю */
+}
+
+.star {
+  font-size: 25px;
+  padding-right: 15px;
+}
+
+.ant-timeline-item {
+  padding: 0;
+}

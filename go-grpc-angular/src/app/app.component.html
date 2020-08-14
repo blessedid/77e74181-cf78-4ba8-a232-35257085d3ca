@@ -1,0 +1,150 @@
+<nz-layout class="layout">
+  <nz-sider *ngIf="menuType == 'vertical'"
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzBreakpoint]="'lg'"
+    [nzCollapsedWidth]="80"
+    [nzTrigger]="null"
+  >
+    <div class="logo-vertical" style="margin-bottom: 41px;">
+      <a routerLink="/">
+        <img src="/assets/img/logo.png" alt="logo" [ngStyle]="{height: isCollapsed ? '23px' : '76px', transition: 'all .2s'}">
+      </a>
+    </div>
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="isCollapsed" *ngFor="let item of menuItems">
+      <li nz-menu-item nzMatchRouter [nzDisabled]="item.disabled">
+        <a routerLink="/{{ (item.panel) ? 'panel/'+item.url : item.url}}" routerLinkActive #rla="routerLinkActive">
+          <i nz-icon><img src="/assets/img/{{ (!rla.isActive) ? item.icon : item.iconActive}}" style="height: 30px" alt=""></i>
+          <span>{{item.caption}}</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header [ngClass]="{'white-headline': menuType == 'vertical'}">
+      <div nz-row>
+        <div nz-col nzSpan="8">
+          <i nz-icon class="trigger-vertical"
+             [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+             (click)="isCollapsed = !isCollapsed"
+          ></i>
+        </div>
+        <div nz-col nzSpan="3" nzOffset="13" *ngIf="isAuth">
+          <i nz-icon nzType="api" nzTheme="outline" [ngStyle]="{'color': (connectionStatus) ? '#64dd17' : '#dd2c00'}" style="font-size: 20px;margin-right: 15px"></i>
+          <a nz-popover
+             style="margin-right: 15px"
+             nzPopoverTitle="Администрирование"
+             [nzPopoverContent]="appTemplate"
+             nzPopoverTrigger="click">
+            <i nz-icon nzType="appstore" nzTheme="outline" style="font-size: 20px;"></i>
+          </a>
+          <a nz-popover
+             nzPopoverTitle="Уведомления"
+             [(nzVisible)]="isVisibleNotification"
+             (nzVisibleChange)="getNotification($event)"
+             nzPopoverTrigger="click"
+             nzPopoverPlacement="bottomRight"
+             [nzPopoverContent]="popoverTemplate">
+            <nz-badge [nzCount]="0"><i nz-icon style="font-size: 20px;" nzType='bell'></i></nz-badge>
+          </a>
+          <a nz-dropdown nzTrigger="click" [nzDropdownMenu]="userMenu" style="padding-left: 24px;">
+            <nz-avatar nzIcon="user"></nz-avatar>
+          </a>
+        </div>
+      </div>
+      <div *ngIf="menuType == 'horizontal'">
+        <div class="logo">
+          <a routerLink="/">
+            <img src="/assets/img/logo.png" alt="logo" style="height: 31px;">
+          </a>
+        </div>
+        <ul nz-menu nzTheme="dark" nzMode="horizontal">
+          <li nz-menu-item nzMatchRouter nzMatchRouterExact *ngFor="let item of menuItems">
+            <a routerLink="/{{item.url}}">
+              <span>{{item.name}}</span>
+            </a>
+          </li>
+          <li nz-menu-item style="float: right" *ngIf="isAuth">
+            <a nz-dropdown nzTrigger="click" [nzDropdownMenu]="userMenu">
+              <nz-avatar nzIcon="user"></nz-avatar>
+            </a>
+          </li>
+          <li nz-menu-item nz-popover style="float: right"
+              nzPopoverTitle="Уведомления"
+              [(nzVisible)]="isVisibleNotification"
+              (nzVisibleChange)="getNotification($event)"
+              nzPopoverTrigger="click"
+              nzPopoverPlacement="bottomLeft"
+              [nzPopoverContent]="popoverTemplate">
+            <nz-badge [nzCount]="5"><i nz-icon nzType="bell" nzTheme="fill"></i></nz-badge>
+          </li>
+          <li nz-menu-item style="float: right"
+              nz-popover
+              nzPopoverTitle="Администрирование"
+              [nzPopoverContent]="appTemplate"
+              nzPopoverTrigger="click">
+            <i nz-icon nzType="appstore" nzTheme="outline"></i>
+          </li>
+        </ul>
+      </div>
+    </nz-header>
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+    <nz-footer>Sittelle ©2020</nz-footer>
+  </nz-layout>
+</nz-layout>
+
+<ng-template #popoverTemplate>
+  <cdk-virtual-scroll-viewport style="height: 300px; width: 290px" itemSize="123" class="demo-infinite-container">
+    <nz-list [nzDataSource]="notificationData" [nzRenderItem]="item" [nzItemLayout]="'horizontal'" [nzLoading]="isLoadingNotification">
+      <ng-template #item let-item>
+        <nz-list-item>
+          <nz-list-item-meta
+            [nzAvatar]="tplAvatar"
+            [nzTitle]="nzTitle"
+            nzDescription="{{item.date}}"
+          >
+            <ng-template #nzTitle>
+              <a routerLink="{{ item.user.id }}">{{ item.user.first_name }} {{ item.user.last_name }}</a>
+              <span style="font-weight: normal"> {{ item.descriptionType }} </span>
+              <a href="/item/{{ item.task.ind }}">{{ item.task.caption }}</a>
+            </ng-template>
+            <ng-template #tplAvatar>
+              <nz-avatar nzIcon="user" nzSrc="//0zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"></nz-avatar>
+            </ng-template>
+          </nz-list-item-meta>
+        </nz-list-item>
+      </ng-template>
+    </nz-list>
+  </cdk-virtual-scroll-viewport>
+</ng-template>
+
+<nz-dropdown-menu #userMenu="nzDropdownMenu">
+  <ul nz-menu>
+    <li nz-menu-item><strong *ngIf="isAuth">{{userInfo.accountPerson.name}} {{userInfo.accountPerson.surname}}</strong></li>
+    <li nz-menu-divider></li>
+    <li nz-menu-item (click)="logout()">Выход</li>
+  </ul>
+</nz-dropdown-menu>
+
+<ng-template #appTemplate>
+<!--  <div nz-row style="width: 350px">-->
+<!--    <div nz-col nzSpan="8">-->
+<!--      <p><a routerLink="/entities">-->
+<!--        <nz-avatar [nzSize]="64" nzSrc="https://pngimage.net/wp-content/uploads/2018/06/%D1%8E%D1%80%D0%B8%D0%B4%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5-%D0%BB%D0%B8%D1%86%D0%BE-png-8.png"></nz-avatar><br/>-->
+<!--        Юр. лица-->
+<!--      </a></p>-->
+<!--    </div>-->
+<!--    <div nz-col nzSpan="8">-->
+<!--      <p><a routerLink="/users">-->
+<!--        <nz-avatar [nzSize]="64" nzSrc="https://img1.freepng.ru/20180306/xsq/kisspng-icon-design-user-icon-men-and-women-users-5a9e8162e402d0.0462243515203372509339.jpg"></nz-avatar><br/>-->
+<!--        Пользователи-->
+<!--      </a></p>-->
+<!--    </div>-->
+<!--  </div>-->
+</ng-template>
+
+<nz-back-top></nz-back-top>

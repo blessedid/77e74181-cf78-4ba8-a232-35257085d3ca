@@ -1,0 +1,88 @@
+<nz-breadcrumb *ngIf="breadcrumb">
+  <nz-breadcrumb-item *ngFor="let item of breadcrumb">
+    {{ item.name }}
+  </nz-breadcrumb-item>
+</nz-breadcrumb>
+<br>
+<div nz-row nzType="flex" nzJustify="center" nzAlign="top">
+  <div nz-col nzSpan="12">
+      <div *ngFor="let group of data" style="padding-bottom: 15px">
+      <nz-table #basicTable [nzData]="group.group" [nzTitle]="editTpl" nzSize="small" nzFrontPagination="false" nzShowPagination="false">
+        <ng-template #editTpl>
+          <div nz-row>
+            <div nz-col nzSpan="22">
+              <h3 style="font-weight: bold;">{{ group.group_name }}</h3>
+            </div>
+            <div nz-col nzSpan="2">
+              <p style="text-align: end;padding-right: 5px;">
+<!--                <a routerLink="/{{url}}/edit/123" [queryParams]="{act: group.url}">ред.</a>-->
+              </p>
+            </div>
+          </div>
+        </ng-template>
+        <tbody>
+        <tr *ngFor="let item of basicTable.data">
+          <td style="width: 50%">
+            <strong>{{ item.rus_name }}</strong>
+          </td>
+          <td>
+            <div *ngIf="['JSON data', 'JSON2', 'link', 'Подробнее'].indexOf(item.value) == -1">{{ item.value }}</div>
+            <nz-tree *ngIf="item.value == 'JSON data'" [nzData]="nodes" (nzDblClick)="nzEvent($event)" nzDraggable nzBlockNode [nzBeforeDrop]="beforeDrop"> </nz-tree>
+            <nz-collapse *ngIf="item.value == 'JSON2'">
+              <nz-collapse-panel
+                nzHeader="Истоиря состояний"
+                nzActive="false"
+                nzDisabled="false"
+              >
+                <div>
+                  <ul>
+                    <li>1.12.2019 00:00:00 - Норма</li>
+                    <li>1.12.2019 00:00:01 - Норма</li>
+                    <li>1.12.2019 00:00:02 - Норма</li>
+                  </ul>
+                </div>
+              </nz-collapse-panel>
+            </nz-collapse>
+            <a *ngIf="item.value == 'link'" href="//{{ item.link }}">{{ item.link }}</a>
+            <a (click)="showModal()" *ngIf="item.value == 'Подробнее'">{{ item.value }}</a>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisibleModal" nzWidth="60vw" nzTitle="Смета" [nzFooter]="null" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+  <nz-table #basicTable [nzData]="listOfData" [nzFrontPagination]="false"
+            [nzShowPagination]="false">
+    <thead>
+    <tr>
+      <th>№ п/п</th>
+      <th nzWidth="50%">Наименование</th>
+      <th nzWidth="5%">Единицы измерения</th>
+      <th>Количество</th>
+      <th>Цена, <br/>руб. с НДС</th>
+      <th>Стоимость, <br/>руб. с НДС</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let data of basicTable.data" >
+      <td>{{ data.key }}</td>
+      <td>{{ data.name }}</td>
+      <td>{{ data.units }}</td>
+      <td>{{ data.amount }}</td>
+      <td>{{ data.price }}</td>
+      <td>{{ data.price * data.amount | number:'.0-3' }}</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><strong>Итого</strong></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>35,500</td>
+    </tr>
+    </tbody>
+  </nz-table>
+</nz-modal>

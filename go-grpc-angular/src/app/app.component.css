@@ -1,0 +1,63 @@
+.layout {
+  min-height: 100vh;
+}
+
+.logo-vertical {
+  margin: 16px;
+}
+
+.white-headline {
+  background: #fff;
+  padding: 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.logo {
+  position: relative;
+  height: 64px;
+  padding-right: 24px;
+  overflow: hidden;
+  line-height: 64px;
+  transition: all .3s;
+  float: left;
+}
+
+.logo img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+[nz-menu] {
+  line-height: 64px;
+}
+
+nz-content {
+  margin: 0 24px;
+}
+
+.inner-content {
+  padding: 24px;
+  background: #fff;
+  min-height: 360px;
+}
+
+nz-footer {
+  text-align: center;
+}
+
+.trigger-vertical {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+[nz-menu-item]:hover {
+  background-color: #1890ff;
+  transition: 0.5s linear;
+}
