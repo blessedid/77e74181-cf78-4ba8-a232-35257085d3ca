@@ -1,5 +1,3 @@
-# garantbox
-
 ## Project setup
 ```
 npm install
